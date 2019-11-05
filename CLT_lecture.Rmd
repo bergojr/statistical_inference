@@ -1,5 +1,5 @@
 ---
-title: "CLT - Lecture"
+title: "CLT - Lectures"
 author: "Luiz Bergo"
 date: "03/11/2019"
 output: html_document
@@ -7,23 +7,30 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(knitr)
 ```
 
 ## Central Limit Theorem - CLT
 
-This is a brief review about the important Central Limit Theory commom called CLT. It is itent to show a practical approach, based om numeric and graphic presentation, so for further studies are highly recommended. 
+### 1. Introduction
+
+This is a brief review about the important *Central Limit Theory* commom called *CLT*. It is itent to show a practical approach, based on numeric and graphic presentation, so for further studies are highly recommended. 
 
 The main idea is to apply the theory on a exponencial distribution and check whether is possible to conclude about the population distribution based on observed data.
 
-The probability densidity function to an expondencial distribution takes form:
+The probability densidity function to an exponencial distribution takes form:
 
-$f(x;\lambda)=\lambda e^{-x\lambda}$ , $x \ge 0$
+$\large f(x;\lambda)=\lambda e^{-x\lambda}$ , $x \ge 0$
 
 For such distribution we have the population parameter as follow:
 
-$\mu = \sigma = \frac {1}{\lambda}$
+$\large \mu = \sigma = \frac {1}{\lambda}$
 
-```{r exp_dist}
+In this work simulation assume $\lambda = 0.2$
+
+```{r exp_dist, fig.align='center'}
 
 x <- seq(0,30, 0.01)
 lambda = 0.2
@@ -36,3 +43,114 @@ text(6, 0.15, "Theoretical mean", col = "blue", adj = c(0, -.1))
 
 ```
 
+
+### 2. Simulations
+
+This section presents the graphtics that lead us to understand some of the main ideas concerning the *Central Limit Theory*.
+
+#### 2.1 Shape of simulated distributions
+
+Three experiments composed by 1000 simulations each were conducted using 10, 20 and 40 samples of exponencial distributions.
+
+```{r simulated_distribution, fig.align='center'}
+lambda = 0.2
+nosim = 1000
+n1 = 10
+n2 = 20
+n3 = 40
+set.seed(63)
+
+data1 <- rexp(nosim*n1,lambda)
+data2 <- rexp(nosim*n2,lambda)
+data3 <- rexp(nosim*n3,lambda)
+
+
+data <- data.frame(
+  x = c(data1, data2, data3),
+  size = factor(rep(c(n1,n2,n3),c(length(data1),length(data2),length(data3))))
+)
+
+g <- ggplot(data, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..count..))
+g + facet_grid(. ~ size)
+
+```
+
+#### 2.2 Distribution of means
+
+The nest step is calculate the mean of samples for every simulation and the result follow below. It´s worthy to note the distribution approximation of the theoretical mean. As far as $n$ is increased the distribution get narrowed indicating less variance as expect.
+
+```{r mean_of_distribution, fig.align='center'}
+
+medias <- data.frame(
+  x = c(apply(matrix(data1, nosim), 1, mean),
+        apply(matrix(data2, nosim), 1, mean),
+        apply(matrix(data3, nosim), 1, mean)
+  ),
+  size = factor(rep(c(n1, n2, n3), rep(nosim, 3)))) 
+
+g <- (ggplot(medias, aes(x = x, fill = size)) 
+      + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..count..)) 
+      + geom_vline(xintercept = 1/lambda, linetype = "dotted", size = 1.5, color = "blue")
+      + annotate("text", label = "Theoretical \n Mean", size = 4, x = 1.4*(1/lambda), y = 200)
+      )
+g + facet_grid(. ~ size)
+
+```
+
+#### 2.3 Normalization of means
+
+The final graphic compare the distribution of means with the normal distribution using $\large \frac {\overline{x} -\mu}{\frac {\sigma} {\sqrt{n}}}$
+
+```{r normal_distribution, fig.align='center'}
+
+cfunc <- function(x, n) sqrt(n) * (mean(x) - 1/lambda) / (1/lambda)
+
+dat <- data.frame(
+  x = c(apply(matrix(data1, nosim), 1, cfunc, n1),
+        apply(matrix(data2, nosim), 1, cfunc, n2),
+        apply(matrix(data3, nosim), 1, cfunc, n3)
+  ),
+  size = factor(rep(c(n1, n2, n3), rep(nosim, 3))))
+
+
+g <- ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) 
+g <- g + stat_function(fun = dnorm, size = 2)
+g + facet_grid(. ~ size)
+
+```
+
+#### 2.4 Theoretical Sample variance vs. Experimental sample variance
+
+As previous observed at graphics of means, the variance reduce with increasing of samples. The table below show this variance in detail.
+
+```{r variance}
+teor_var1 <- (1/lambda^2)/n1
+teor_var2 <- (1/lambda^2)/n2
+teor_var3 <- (1/lambda^2)/n3
+sample_var1 <- var(medias$x[medias$size==n1])
+sample_var2 <- var(medias$x[medias$size==n2])
+sample_var3 <- var(medias$x[medias$size==n3])
+conf_1 <- t.test(medias$x[medias$size==n1])
+conf_2 <- t.test(medias$x[medias$size==n1])
+Conf_3 <- t.test(medias$x[medias$size==n1])
+
+var_table <- tbl_df(rbind(c(n1, teor_var1, sample_var1),
+                   cbind(n2, teor_var2,sample_var2),
+                   cbind(n3, teor_var3, sample_var3)))
+kable(var_table)
+
+```
+
+
+### 3. Conclusion
+
+Some simulation where provided to shown this very useful characteristic of mean of distribution that tends to be a normal distribution according to the CLT. It´s also viewed variance reduction as the sample increases. 
+That said, even with no idea of the distribution itself, take the mean of samples lead to *good estimatives of mean and variance of population*. 
+
+
+### References
+
+Source used in this lecture can be found at:
+
+[1] https://github.com/bcaffo/courses
+[2] https://www.calvin.edu/~rpruim/courses/s341/S17/from-class/MathinRmd.html

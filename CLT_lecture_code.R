@@ -81,7 +81,7 @@ medias <- data.frame(
         apply(matrix(data2, nosim), 1, mean),
         apply(matrix(data3, nosim), 1, mean)
   ),
-  size = factor(rep(c(n1, n2, n3), rep(nosim, 3)))) 
+  size = factor(rep(c(n1, n2, n3), rep(nosim, 3)))))
 
 g <- (ggplot(medias, aes(x = x, fill = size)) 
       + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..count..)) 
@@ -111,12 +111,17 @@ teor_var3 <- (1/lambda^2)/n3
 sample_var1 <- var(medias$x[medias$size==n1])
 sample_var2 <- var(medias$x[medias$size==n2])
 sample_var3 <- var(medias$x[medias$size==n3])
+conf_1 <- t.test(medias$x[medias$size==n1])$conf.int
+conf_2 <- t.test(medias$x[medias$size==n2])$conf.int
+conf_3 <- t.test(medias$x[medias$size==n2])$conf.int
+
+lista_1 <- list(n1, teor_var1, sample_var1, paste(round(conf_1[1], 3),"-",round(conf_1[2],3)))
 
 var_table <- tbl_df(rbind(c(n1, teor_var1, sample_var1),
                    cbind(n2, teor_var2,sample_var2),
                    cbind(n3, teor_var3, sample_var3)))
 
-names(var_table) <- c("Size", "Theor. Variance", "Sample Variance")
+names(var_table) <- c("Size", "Theor. Variance", "Sample Variance", "Mean Conf. Interval")
 
 cfunc <- function(x, n) sqrt(n) * (mean(x) - 1/lambda) / (1/lambda)
 
