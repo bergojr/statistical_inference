@@ -1,0 +1,68 @@
+---
+title: "Tooth Growth Guinea Pig"
+author: "Luiz Bergo"
+date: "06/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(knitr)
+```
+
+## Tooth Growth Guinea Pig
+
+This document present analisys on dataset "ToothGrowth" available at R default packages. 
+
+This is required as part of Statistical Inference course from Jhons Hopkins University powered by Coursera. 
+
+The dataset is composed by 60 records of experiments on doses of *Vitamin C* administrated on a population of Guinea Pigs. The vitamin was introducted in pig´s diets in two forms as *Orange Juice* or *Ascorbic Acid* and the results on pig´s teeth group was recorded.
+
+A summary of experiment table is shown:
+
+```{r toothgowth}
+
+data(ToothGrowth)
+dt <- ToothGrowth
+
+boxplot(dt$len~dt$supp, col=c("red","blue"), xaxt = "n", main = "Tooth growth for differente Vitamin C", xlab = "Type of Vitamin", ylab = "Tooth length (mm)")
+axis(1, 1:2, c("Orange Juice", "Ascorbic Acid"))
+
+```
+
+Based on this graphic it is possible to observe that teeth wich pigs were fed with orange juice are bigger than that fed with scorbic acid.
+
+Testing the confidence interval:
+
+$H_{0}: \mu_{OC} = \mu_{VC}$
+$H_{a}: \mu_{OC} != \mu_{VC}$
+
+This is confirmed observing the fail to reject the hipotesys of the mean growth of two groups are the same.
+
+Since it is not given any information about teeth grwoth population, a *t test* interval was evaluated considering both, equal and unequal variance between the two groups. 
+
+```{r hipotesys_test}
+t.test(OJ_dt$len,VC_dt$len, var.equal = FALSE , paired = FALSE)$conf
+t.test(OJ_dt$len,VC_dt$len, var.equal = TRUE , paired = FALSE)$conf
+
+```
+
+
+
+In both cases the mean 
+
+## Data investigation
+
+Follow the summary main question is raised:
+
+- Wich form of Vitamin C promote greater teeth growth?
+
+Aiming for answer this question a simple box plot is presented.
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
