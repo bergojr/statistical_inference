@@ -121,9 +121,42 @@ g + facet_grid(. ~ size)
 
 #### 2.4 Theoretical Sample variance vs. Experimental sample variance
 
-As previous observed at graphics of means, the variance reduce with increasing of samples. The table below show this variance in detail.
+As previous observed at graphics of means, the mean converges to its theoretical value and the variance reduce with increasing of samples.
 
-```{r variance}
+The interval for means at 95% of confidence is:
+
+```{r mean_confidence_interval, echo=FALSE}
+
+# Calculate de confidence interval for means
+
+conf_med_1 <- t.test(medias$x[medias$size==n1])$conf.int
+conf_med_2 <- t.test(medias$x[medias$size==n2])$conf.int
+conf_med_3 <- t.test(medias$x[medias$size==n2])$conf.int
+
+# This was necessary due to errors in naming data frame not fixed until the end of # # # report
+# --- Begin here ---
+conf_med_1_min <-conf_med_1[1]
+conf_med_1_max <-conf_med_1[2]
+conf_med_2_min <-conf_med_2[1]
+conf_med_2_max <-conf_med_2[2]
+conf_med_3_min <-conf_med_3[1]
+conf_med_3_max <-conf_med_3[2]
+# --- End here ---
+
+tbl_means <- rbind(c(n1, conf_med_1_min, conf_med_1_max),
+                   cbind(n2, conf_med_2_min, conf_med_2_max),
+                   cbind(n3, conf_med_3_min, conf_med_3_max))
+
+tbl_means <- tbl_df(tbl_means)
+names(tbl_means) <- c("Size", "Min. value", "Max. value")
+kable(tbl_means, format = "html", table.attr = "style='width:30%;'")
+
+```
+
+
+The table below show the theoretical variance of samples in comparison to measured value.
+
+```{r variance, echo=FALSE}
 teor_var1 <- (1/lambda^2)/n1
 teor_var2 <- (1/lambda^2)/n2
 teor_var3 <- (1/lambda^2)/n3
@@ -137,7 +170,9 @@ Conf_3 <- t.test(medias$x[medias$size==n1])
 var_table <- tbl_df(rbind(c(n1, teor_var1, sample_var1),
                    cbind(n2, teor_var2,sample_var2),
                    cbind(n3, teor_var3, sample_var3)))
-kable(var_table)
+names(var_table) <- c("Size", "Theor. Variance", "Sample Variance")
+
+kable(var_table,format = "html", table.attr = "style='width:30%;'")
 
 ```
 
@@ -152,5 +187,5 @@ That said, even with no idea of the distribution itself, take the mean of sample
 
 Source used in this lecture can be found at:
 
-[1] https://github.com/bcaffo/courses
+[1] https://github.com/bcaffo/courses  
 [2] https://www.calvin.edu/~rpruim/courses/s341/S17/from-class/MathinRmd.html

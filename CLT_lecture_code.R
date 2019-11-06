@@ -50,7 +50,7 @@ hist(mns)
 # - Sample Mean versus Theoretical Mean: Include figures with titles. In the figures, highlight the means you are comparing. Include text that explains the figures and what is shown on them, and provides appropriate numbers.
 # - Sample Variance versus Theoretical Variance: Include figures (output from R) with titles. Highlight the variances you are comparing. Include text that explains your understanding of the differences of the variances.
 # - Distribution: Via figures and text, explain how one can tell the distribution is approximately normal.
-
+library(knitr)
 library(dplyr)
 lambda = 0.2
 nosim = 1000
@@ -81,7 +81,7 @@ medias <- data.frame(
         apply(matrix(data2, nosim), 1, mean),
         apply(matrix(data3, nosim), 1, mean)
   ),
-  size = factor(rep(c(n1, n2, n3), rep(nosim, 3)))))
+  size = factor(rep(c(n1, n2, n3), rep(nosim, 3))))
 
 g <- (ggplot(medias, aes(x = x, fill = size)) 
       + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..count..)) 
@@ -105,23 +105,42 @@ g <- (ggplot(variances, aes(x = x, fill = size))
 )
 g + facet_grid(. ~ size)
 
+# Calculate de confidence interval for means
+
+conf_med_1 <- t.test(medias$x[medias$size==n1])$conf.int
+conf_med_2 <- t.test(medias$x[medias$size==n2])$conf.int
+conf_med_3 <- t.test(medias$x[medias$size==n2])$conf.int
+
+# This was necessary due to errors in naming data frame
+# --- Begin here ---
+conf_med_1_min <-conf_med_1[1]
+conf_med_1_max <-conf_med_1[2]
+conf_med_2_min <-conf_med_2[1]
+conf_med_2_max <-conf_med_2[2]
+conf_med_3_min <-conf_med_3[1]
+conf_med_3_max <-conf_med_3[2]
+# --- End here ---
+
+tbl_means <- rbind(c(n1, conf_med_1_min, conf_med_1_max),
+                   cbind(n2, conf_med_2_min, conf_med_2_max),
+                   cbind(n3, conf_med_3_min, conf_med_3_max))
+
+tbl_means <- tbl_df(tbl_means)
+names(tbl_means) <- c("Size", "Min. value", "Max. value")
+kable(tbl_means, format = "markdown", table.attr = "style='width:30%;'")
+
 teor_var1 <- (1/lambda^2)/n1
 teor_var2 <- (1/lambda^2)/n2
 teor_var3 <- (1/lambda^2)/n3
 sample_var1 <- var(medias$x[medias$size==n1])
 sample_var2 <- var(medias$x[medias$size==n2])
 sample_var3 <- var(medias$x[medias$size==n3])
-conf_1 <- t.test(medias$x[medias$size==n1])$conf.int
-conf_2 <- t.test(medias$x[medias$size==n2])$conf.int
-conf_3 <- t.test(medias$x[medias$size==n2])$conf.int
-
-lista_1 <- list(n1, teor_var1, sample_var1, paste(round(conf_1[1], 3),"-",round(conf_1[2],3)))
 
 var_table <- tbl_df(rbind(c(n1, teor_var1, sample_var1),
                    cbind(n2, teor_var2,sample_var2),
                    cbind(n3, teor_var3, sample_var3)))
 
-names(var_table) <- c("Size", "Theor. Variance", "Sample Variance", "Mean Conf. Interval")
+names(var_table) <- c("Size", "Theor. Variance", "Sample Variance")
 
 cfunc <- function(x, n) sqrt(n) * (mean(x) - 1/lambda) / (1/lambda)
 
@@ -135,7 +154,9 @@ dat <- data.frame(
 
 g <- ggplot(dat, aes(x = x, fill = size)) + geom_histogram(alpha = .20, binwidth=.3, colour = "black", aes(y = ..density..)) 
 g <- g + stat_function(fun = dnorm, size = 2)
+g <- g + ggtitle("Distribution of means", )
 g + facet_grid(. ~ size)
+
 
 
 
