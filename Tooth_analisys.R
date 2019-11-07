@@ -17,10 +17,10 @@ attach(ToothGrowth)
 OJ_dt <- dt[dt$supp=="OJ",]
 VC_dt <- dt[dt$supp=="VC",]
 
-boxplot(dt$len~dt$supp, col=c("red","blue"), xaxt = "n", xlab = "Type of Vitamin", ylab = "Tooth length (mm)")
+boxplot(dt$len~dt$supp, col=c("red","blue"), xaxt = "n", xlab = "Type of Vitamin", ylab = "Tooth length ")
 axis(1, 1:2, c("Orange Juice", "Ascorbic Acid"))
 
-boxplot(dt$len~dt$supp*dose, col=c("red","blue"), xaxt = "n", xlab = "Dose (md/day)", ylab = "Tooth length (mm)")
+boxplot(dt$len~dt$supp*dose, col=c("red","blue"), xaxt = "n", xlab = "Dose (mg/day)", ylab = "Tooth length ")
 axis(1, c(1.5, 3.5, 5.5 ) , c(0.5, 1.0, 2.0 ))
 legend(x = c(5.0, 6.0), y = c(8, 12), legend=c("Orange Juice", "Ascorbic Acid"), 
        fill = c("red","blue"),col=c("red", "blue"), box.lty=0, cex=1.1)
